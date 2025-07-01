@@ -1,52 +1,32 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { dbConnect } from '../../../lib/mongodb';
-import Discussion from '../../../models/Discussion';
+
+// In-memory placeholder for discussions
+let discussions: any[] = [];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
-  await dbConnect.connectToKnowledgeDb();
-
   switch (req.method) {
-    case 'GET':
-      try {
-        const discussion = await Discussion.findById(id);
-        if (!discussion) {
-          return res.status(404).json({ error: 'Discussion not found' });
-        }
-        res.status(200).json(discussion);
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch discussion' });
-      }
+    case 'GET': {
+      const discussion = discussions.find(d => d.id === id);
+      if (!discussion) return res.status(404).json({ error: 'Discussion not found' });
+      res.status(200).json(discussion);
       break;
-
-    case 'PUT':
-      try {
-        const discussion = await Discussion.findByIdAndUpdate(id, req.body, {
-          new: true,
-          runValidators: true,
-        });
-        if (!discussion) {
-          return res.status(404).json({ error: 'Discussion not found' });
-        }
-        res.status(200).json(discussion);
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to update discussion' });
-      }
+    }
+    case 'PUT': {
+      const idx = discussions.findIndex(d => d.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Discussion not found' });
+      discussions[idx] = { ...discussions[idx], ...req.body };
+      res.status(200).json(discussions[idx]);
       break;
-
-    case 'DELETE':
-      try {
-        const discussion = await Discussion.findByIdAndDelete(id);
-        if (!discussion) {
-          return res.status(404).json({ error: 'Discussion not found' });
-        }
-        res.status(200).json({ message: 'Discussion deleted successfully' });
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to delete discussion' });
-      }
+    }
+    case 'DELETE': {
+      const idx = discussions.findIndex(d => d.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Discussion not found' });
+      discussions.splice(idx, 1);
+      res.status(200).json({ message: 'Discussion deleted successfully' });
       break;
-
+    }
     default:
       res.status(405).json({ error: 'Method not allowed' });
   }
-} 
+}

@@ -1,3 +1,5 @@
+import type { Operation } from '../../types/quantum';
+
 export interface Complex {
   real: number;
   imag: number;
@@ -27,4 +29,4 @@ export interface CircuitMetrics {
   multiQubitGates: number;
   singleQubitGates: number;
   measurements: number;
-} 
+}

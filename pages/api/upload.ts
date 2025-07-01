@@ -26,9 +26,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Get the uploaded file
-    const file = files.file as formidable.File;
-    const folderPath = fields.folderPath as string;
-    const fileName = fields.fileName as string;
+    let file: formidable.File | undefined;
+    if (Array.isArray(files.file)) {
+      file = files.file[0];
+    } else {
+      file = files.file;
+    }
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    let folderPath: string | undefined;
+    if (Array.isArray(fields.folderPath)) {
+      folderPath = fields.folderPath[0];
+    } else {
+      folderPath = fields.folderPath;
+    }
+    if (!folderPath) {
+      return res.status(400).json({ error: 'No folder path provided' });
+    }
+    let fileName: string | undefined;
+    if (Array.isArray(fields.fileName)) {
+      fileName = fields.fileName[0];
+    } else {
+      fileName = fields.fileName;
+    }
+    if (!fileName) {
+      return res.status(400).json({ error: 'No file name provided' });
+    }
 
     // Set up Google Drive API
     const auth = new google.auth.GoogleAuth({
@@ -79,9 +103,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 // Helper function to create nested folders
-async function createFolderPath(drive: any, path: string) {
+import type { drive_v3 } from 'googleapis';
+
+async function createFolderPath(drive: drive_v3.Drive, path: string): Promise<string[]> {
   const folderNames = path.split('/').filter(Boolean);
-  const folderIds = [];
+  const folderIds: string[] = [];
   let parentId = 'root';
 
   for (const folderName of folderNames) {
@@ -91,10 +117,10 @@ async function createFolderPath(drive: any, path: string) {
       fields: 'files(id, name)',
     });
 
-    let folderId;
-    if (response.data.files.length > 0) {
+    let folderId: string;
+    if (response.data.files && response.data.files.length > 0) {
       // Folder exists
-      folderId = response.data.files[0].id;
+      folderId = response.data.files[0].id!;
     } else {
       // Create folder
       const folderMetadata = {
@@ -102,18 +128,14 @@ async function createFolderPath(drive: any, path: string) {
         mimeType: 'application/vnd.google-apps.folder',
         parents: [parentId],
       };
-      
       const folder = await drive.files.create({
         requestBody: folderMetadata,
         fields: 'id',
       });
-      
-      folderId = folder.data.id;
+      folderId = folder.data.id!;
     }
-    
     folderIds.push(folderId);
     parentId = folderId;
   }
-  
   return folderIds;
 }

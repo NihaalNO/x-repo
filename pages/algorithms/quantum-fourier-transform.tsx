@@ -139,6 +139,7 @@ export default function QuantumFourierTransform() {
               <li>Hadamard gates (H)</li>
               <li>Controlled phase rotations (R<sub>k</sub>)</li>
               <li>SWAP gates for bit reversal</li>
+            </ul>
             <ul className="list-disc list-inside text-gray-300 space-y-2">
               <li>Phase estimation</li>
               <li>Shor's algorithm</li>
