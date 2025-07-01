@@ -9,28 +9,28 @@ export class CircuitOptimizer {
     let optimizedOps = [...operations];
 
     // Cancellation of adjacent inverse gates
-    optimizedOps = this.cancelInverseGates(optimizedOps, improvements);
+    optimizedOps = this.cancelInverseGates(optimizedOps);
 
     // Merge adjacent rotations
-    optimizedOps = this.mergeRotations(optimizedOps, improvements);
+    optimizedOps = this.mergeRotations(optimizedOps);
 
     // Commutation rules
-    optimizedOps = this.applyCommutationRules(optimizedOps, improvements);
+    optimizedOps = this.applyCommutationRules(optimizedOps);
 
     return { optimizedOperations: optimizedOps, improvements };
   }
 
-  private static cancelInverseGates(ops: Operation[], improvements: string[]): Operation[] {
+  private static cancelInverseGates(ops: Operation[]): Operation[] {
     // Implementation of gate cancellation logic
     return ops;
   }
 
-  private static mergeRotations(ops: Operation[], improvements: string[]): Operation[] {
+  private static mergeRotations(ops: Operation[]): Operation[] {
     // Implementation of rotation merging logic
     return ops;
   }
 
-  private static applyCommutationRules(ops: Operation[], improvements: string[]): Operation[] {
+  private static applyCommutationRules(ops: Operation[]): Operation[] {
     // Implementation of commutation rules
     return ops;
   }
