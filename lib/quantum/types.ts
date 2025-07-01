@@ -1,4 +1,4 @@
-import type { Operation } from '../../types/quantum';
+import { Operation } from '../../types/quantum';
 
 export interface Complex {
   real: number;
@@ -13,6 +13,7 @@ export interface QuantumState {
 export interface CircuitHistory {
   id: string;
   timestamp: Date;
+  operations: Operation[];
   description: string;
 }
 
