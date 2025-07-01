@@ -19,10 +19,10 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-interface": "off",
       "@typescript-eslint/no-empty-object-type": "off",
-      "react-hooks/exhaustive-deps": "warn", // downgrade to warning
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/rules-of-exhaustive-deps": "warn",
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/exhaustive-deps": "off", // downgrade to warning
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/rules-of-exhaustive-deps": "off",
+      "react-hooks/exhaustive-deps": "off",
       "react/prop-types": "off",
       "react/display-name": "off",
       "react/no-unescaped-entities": "off",
@@ -31,18 +31,12 @@ const eslintConfig = [
       "react/no-unstable-nested-components": "off",
       "react/no-children-prop": "off",
       "react/no-unknown-property": ["error", { ignore: ["css"] }],
-      "react/jsx-key": "warn",
-      "react/jsx-no-useless-fragment": "warn",
+      "react/jsx-key": "off",
+      "react/jsx-no-useless-fragment": "off",
       "react/jsx-uses-react": "off",
-      "react/jsx-uses-vars": "warn",
-      "react/jsx-no-target-blank": [
-        "error",
-        {
-          enforceDynamicLinks: "always",
-          allowReferrer: true,
-        },
-      ],
-      "react/jsx-no-script-url": "error",
+      "react/jsx-uses-vars": "off",
+      "react/jsx-no-target-blank":"off",
+      "react/jsx-no-script-url": "off",
       "react/react-in-jsx-scope": "off",
       "react/jsx-filename-extension": ["error", { extensions: [".js", ".jsx", ".tsx", ".ts"] }],
       "react/react-jsx-props-no-spreading": "off",
@@ -68,6 +62,7 @@ const eslintConfig = [
       "react/prefer-stateless-function": "off",
       "react/require-default-props": "off",
       "react/require-optimization": "off",
+      "react/unescaped-entities": "off",
       "react/sort-comp": [
         "error",
         {

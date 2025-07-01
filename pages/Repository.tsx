@@ -22,7 +22,7 @@ export default function Repository() {
   const [circuitName, setCircuitName] = useState('');
   const [circuitDescription, setCircuitDescription] = useState('');
   const [numQubits, setNumQubits] = useState(1);
-  const [currentUser, setCurrentUser] = useState('');
+  const [currentUser] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [algorithms, setAlgorithms] = useState<Algorithm[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +47,7 @@ export default function Repository() {
       const response = await fetch('/api/algorithms');
       const data: Algorithm[] = await response.json();
       setAlgorithms(data);
-    } catch (error: unknown) {
+    } catch{
       toast.error('Failed to fetch algorithms');
     } finally {
       setIsLoading(false);
