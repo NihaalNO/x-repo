@@ -13,7 +13,6 @@ export interface QuantumState {
 export interface CircuitHistory {
   id: string;
   timestamp: Date;
-  operations: Operation[];
   description: string;
 }
 
