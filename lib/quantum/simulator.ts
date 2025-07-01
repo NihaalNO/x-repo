@@ -46,10 +46,9 @@ export class QuantumSimulator {
     const newState = new Array(this.state.length).fill(null).map(() => ({ real: 0, imag: 0 }));
     
     for (let i = 0; i < this.state.length; i++) {
-      const bit = (i >> targetQubit) & 1;
       const pairIndex = i ^ (1 << targetQubit);
       
-      if (bit === 0) {
+      if (((i >> targetQubit) & 1) === 0) {
         // |0⟩ component
         newState[i] = this.add(
           this.multiply(gate[0][0], this.state[i]),
