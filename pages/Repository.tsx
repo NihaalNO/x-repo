@@ -135,22 +135,22 @@ export default function Repository() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 to-black text-white p-8">
-      <div className="max-w-6xl mx-auto mb-8 flex justify-end">
+    <div className="min-h-screen bg-gradient-to-r from-gray-900 to-black text-white p-4 sm:p-8">
+      <div className="max-w-full sm:max-w-6xl mx-auto mb-8 flex flex-col sm:flex-row sm:justify-end">
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
           <FiUpload /> Upload Algorithm
         </button>
       </div>
 
       {isUploadModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800/95 backdrop-blur rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold flex items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-gray-800/95 backdrop-blur rounded-xl shadow-xl w-full max-w-lg sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-8">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
+                <h2 className="text-xl sm:text-2xl font-semibold flex items-center">
                   <FiUpload className="mr-2" /> Upload Quantum Algorithm
                 </h2>
                 <button
@@ -161,18 +161,18 @@ export default function Repository() {
                 </button>
               </div>
 
-              <form onSubmit={uploadAlgorithm} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={uploadAlgorithm} className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
                     placeholder="Algorithm Name *"
-                    className="bg-gray-700 rounded-lg px-4 py-2"
+                    className="bg-gray-700 rounded-lg px-3 sm:px-4 py-2"
                     value={circuitName}
                     onChange={(e) => setCircuitName(e.target.value)}
                     required
                   />
                   <select
-                    className="bg-gray-700 rounded-lg px-4 py-2"
+                    className="bg-gray-700 rounded-lg px-3 sm:px-4 py-2"
                     value={selectedLanguage}
                     onChange={(e) => setSelectedLanguage(e.target.value)}
                     required
@@ -185,15 +185,15 @@ export default function Repository() {
 
                 <textarea
                   placeholder="Algorithm Description *"
-                  className="w-full bg-gray-700 rounded-lg px-4 py-2 h-32"
+                  className="w-full bg-gray-700 rounded-lg px-3 sm:px-4 py-2 h-24 sm:h-32"
                   value={circuitDescription}
                   onChange={(e) => setCircuitDescription(e.target.value)}
                   required
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <select
-                    className="bg-gray-700 rounded-lg px-4 py-2"
+                    className="bg-gray-700 rounded-lg px-3 sm:px-4 py-2"
                     value={complexity}
                     onChange={(e) => setComplexity(e.target.value)}
                     required
@@ -206,7 +206,7 @@ export default function Repository() {
                   <input
                     type="number"
                     placeholder="Number of Qubits *"
-                    className="bg-gray-700 rounded-lg px-4 py-2"
+                    className="bg-gray-700 rounded-lg px-3 sm:px-4 py-2"
                     value={numQubits}
                     onChange={(e) => setNumQubits(parseInt(e.target.value))}
                     min="1"
@@ -244,7 +244,7 @@ export default function Repository() {
                   <input
                     type="text"
                     placeholder="Tags (comma-separated) *"
-                    className="w-full bg-gray-700 rounded-lg px-4 py-2"
+                    className="w-full bg-gray-700 rounded-lg px-3 sm:px-4 py-2"
                     value={selectedTags.join(', ')}
                     onChange={(e) => {
                       const tags = e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
@@ -261,29 +261,29 @@ export default function Repository() {
                     type="file"
                     accept=".qasm"
                     onChange={(e) => setQasmFile(e.target.files?.[0] || null)}
-                    className="w-full bg-gray-700 rounded-lg px-4 py-2 text-sm"
+                    className="w-full bg-gray-700 rounded-lg px-3 sm:px-4 py-2 text-sm"
                   />
                   <p className="text-xs text-gray-400">Upload a .qasm file or paste your code below</p>
                 </div>
 
                 <textarea
                   placeholder="Paste QASM code here (optional)"
-                  className="w-full bg-gray-700 rounded-lg px-4 py-2 h-40 text-sm text-white"
+                  className="w-full bg-gray-700 rounded-lg px-3 sm:px-4 py-2 h-28 sm:h-40 text-sm text-white"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 />
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     type="button"
                     onClick={() => setIsUploadModalOpen(false)}
-                    className="w-1/2 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                    className="w-full sm:w-1/2 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="w-1/2 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2"
+                    className="w-full sm:w-1/2 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2"
                   >
                     <FiUpload /> Upload Algorithm
                   </button>
@@ -294,17 +294,17 @@ export default function Repository() {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto mb-8">
-        <div className="flex gap-4 mb-6">
+      <div className="max-w-full sm:max-w-6xl mx-auto mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <input
             type="text"
             placeholder="Search algorithms..."
-            className="flex-1 bg-gray-800 rounded-lg px-4 py-2 border border-gray-700 focus:border-blue-500 focus:outline-none"
+            className="flex-1 bg-gray-800 rounded-lg px-3 sm:px-4 py-2 border border-gray-700 focus:border-blue-500 focus:outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <select
-            className="bg-gray-800 rounded-lg px-4 py-2 border border-gray-700"
+            className="bg-gray-800 rounded-lg px-3 sm:px-4 py-2 border border-gray-700"
             value={selectedFilter}
             onChange={(e) => setSelectedFilter(e.target.value)}
           >
@@ -316,8 +316,8 @@ export default function Repository() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-6">Available Algorithms</h2>
+      <div className="max-w-full sm:max-w-6xl mx-auto">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-6">Available Algorithms</h2>
         {isLoading ? (
           <div className="text-center">Loading...</div>
         ) : (
