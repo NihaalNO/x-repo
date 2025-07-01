@@ -34,4 +34,4 @@ export class CircuitOptimizer {
     // Implementation of commutation rules
     return ops;
   }
-} 
+}
