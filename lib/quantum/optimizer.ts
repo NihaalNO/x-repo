@@ -1,4 +1,4 @@
-import { Operation } from '../components/QuantumCircuit';
+import { Operation } from '../../components/QuantumCircuit';
 
 export class CircuitOptimizer {
   static optimize(operations: Operation[]): {
