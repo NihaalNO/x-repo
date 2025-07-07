@@ -78,7 +78,7 @@ export default function ProfileSetupDialog({ open, onOpenChange, onComplete }: P
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md md:max-w-lg bg-white text-gray-900">
+      <DialogContent className="sm:max-w-md md:max-w-lg bg-white dark:bg-black text-gray-900 dark:text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900">
             Let's set up your profile
@@ -113,7 +113,7 @@ export default function ProfileSetupDialog({ open, onOpenChange, onComplete }: P
               <Button 
                 onClick={handleNext}
                 disabled={!profileData.firstName || !profileData.lastName}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-black hover:bg-gray-800 text-white"
               >
                 Next
               </Button>
@@ -142,7 +142,7 @@ export default function ProfileSetupDialog({ open, onOpenChange, onComplete }: P
               <Button 
                 onClick={handleNext}
                 disabled={!profileData.referralSource}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-black hover:bg-gray-800 text-white"
               >
                 Next
               </Button>
@@ -171,7 +171,7 @@ export default function ProfileSetupDialog({ open, onOpenChange, onComplete }: P
               <Button 
                 onClick={handleComplete}
                 disabled={profileData.interests.length === 0}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
+                className="bg-black hover:bg-gray-800 text-white"
               >
                 Welcome to XREPO
               </Button>

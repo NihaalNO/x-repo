@@ -7,7 +7,7 @@ interface ProfileSettingsProps {
 
 const ProfileSettings = ({ notifications, language, onToggleChange, onInputChange }: ProfileSettingsProps) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-6">
+    <div className="bg-black rounded-lg p-6">
       <h2 className="text-xl font-semibold text-white mb-4">Settings</h2>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -15,7 +15,7 @@ const ProfileSettings = ({ notifications, language, onToggleChange, onInputChang
           <button
             onClick={() => onToggleChange('notifications')}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              notifications ? 'bg-purple-600' : 'bg-gray-600'
+              notifications ? 'bg-gray-700' : 'bg-gray-600'
             }`}
           >
             <span
@@ -25,7 +25,6 @@ const ProfileSettings = ({ notifications, language, onToggleChange, onInputChang
             />
           </button>
         </div>
-        
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">Language</label>
           <select

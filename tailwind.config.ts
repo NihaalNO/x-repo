@@ -15,4 +15,7 @@ export default {
     },
   },
   plugins: [],
+  corePlugins: {
+    scrollBehavior: true,
+  },
 } satisfies Config;

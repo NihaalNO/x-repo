@@ -63,8 +63,8 @@ const ProfileEditModal = ({
   const profilePhotoRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-gray-600 flex items-center justify-center z-50 p-4">
+      <div className="bg-black rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">Edit Profile</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -96,7 +96,7 @@ const ProfileEditModal = ({
             </div>
             <button
               onClick={() => profilePhotoRef.current?.click()}
-              className="flex items-center text-purple-400 hover:text-purple-300"
+              className="flex items-center text-gray-400 hover:text-white"
             >
               <FiUpload className="mr-2" />
               Change Profile Photo
@@ -118,7 +118,7 @@ const ProfileEditModal = ({
               name="name"
               value={profile.name}
               onChange={onInputChange}
-              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-gray-500 focus:outline-none"
             />
           </div>
           
@@ -129,7 +129,7 @@ const ProfileEditModal = ({
               name="email"
               value={profile.email}
               onChange={onInputChange}
-              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-gray-500 focus:outline-none"
               disabled
             />
             <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
@@ -141,7 +141,7 @@ const ProfileEditModal = ({
               name="bio"
               value={profile.bio}
               onChange={onInputChange}
-              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 h-24 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 h-24 focus:ring-2 focus:ring-gray-500 focus:outline-none"
               placeholder="Tell us about yourself..."
             />
           </div>
@@ -152,7 +152,7 @@ const ProfileEditModal = ({
               name="domain"
               value={profile.domain}
               onChange={onInputChange}
-              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+              className="w-full bg-gray-700 text-white rounded-md px-4 py-2 focus:ring-2 focus:ring-gray-500 focus:outline-none"
             >
               <option value="">Select a domain</option>
               {QUANTUM_DOMAINS.map((domain) => (
@@ -168,13 +168,13 @@ const ProfileEditModal = ({
                 type="text"
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
-                className="flex-1 bg-gray-700 text-white rounded-l-md px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                className="flex-1 bg-gray-700 text-white rounded-l-md px-4 py-2 focus:ring-2 focus:ring-gray-500 focus:outline-none"
                 placeholder="Add a skill..."
                 onKeyPress={(e) => e.key === 'Enter' && onAddSkill()}
               />
               <button
                 onClick={onAddSkill}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-r-md"
+                className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-r-md"
               >
                 Add
               </button>

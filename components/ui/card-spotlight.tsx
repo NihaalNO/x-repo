@@ -29,7 +29,7 @@ export const CardSpotlight = ({
 
   return (
     <div
-      className={`group/spotlight relative rounded-xl border border-neutral-800 bg-black/50 p-8 ${className}`}
+      className={`group/spotlight relative rounded-xl border border-neutral-800 bg-black/50 p-8 transition-colors duration-300 hover:bg-opacity-80 ${className}`}
       onMouseMove={handleMouseMove}
       {...props}
     >
@@ -53,7 +53,9 @@ export const CardSpotlight = ({
           `,
         }}
       />
+      {/* Add a more noticeable overlay on hover */}
+      <div className="absolute inset-0 rounded-xl pointer-events-none transition duration-300 opacity-0 group-hover/spotlight:opacity-40" style={{background: color}} />
       {children}
     </div>
   );
-}; 
+};

@@ -9,7 +9,7 @@ interface ProfileInfoProps {
 
 const ProfileInfo = ({ name, email, bio, domain, skills, onEditProfile }: ProfileInfoProps) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-6">
+    <div className="bg-black rounded-lg p-6">
       <h1 className="text-2xl font-bold text-white mb-1">{name}</h1>
       <p className="text-gray-400 mb-4">{email}</p>
       
@@ -40,7 +40,7 @@ const ProfileInfo = ({ name, email, bio, domain, skills, onEditProfile }: Profil
       
       <button
         onClick={onEditProfile}
-        className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+        className="w-full mt-6 bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors duration-200"
       >
         Edit Profile
       </button>

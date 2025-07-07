@@ -18,8 +18,8 @@ const Histogram: React.FC<HistogramProps> = ({ results }) => {
       {
         label: 'Measurement Results',
         data: dataValues,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(100, 100, 100, 0.7)',
+        borderColor: 'rgba(50, 50, 50, 1)',
         borderWidth: 1,
       },
     ],

@@ -11,7 +11,7 @@ import BannerEditModal from '../components/profile/BannerEditModal';
 import PostsSection from '../components/profile/PostsSection';
 import { FiUser, FiSettings, FiCreditCard, FiLogOut } from 'react-icons/fi';
 import { logoutUser } from '@/utils/firebase';
-
+import { supabase } from '../types/supabaseclient';
 interface UserProfile {
   id: string;
   name: string;
@@ -68,6 +68,7 @@ const DEFAULT_PROFILE_PHOTO = '/images/default-pp.jpg';
 
 export default function Profile() {
   const router = useRouter();
+  const [profilePhoto, setProfilePhoto] = useState('/images/default-pp.jpg');
   const [fadeIn, setFadeIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -374,9 +375,9 @@ export default function Profile() {
   }, [isLoggedIn, fadeIn, router]);
 
   return (
-    <div className={`min-h-screen bg-gray-900 text-white ${fadeIn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
+    <div className={`min-h-screen bg-black text-white ${fadeIn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white p-4 z-40 border-b border-gray-800">
+      <nav className="fixed top-0 left-0 right-0 bg-black text-white p-4 z-40 border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {/* Hamburger Menu Button */}
@@ -410,7 +411,7 @@ export default function Profile() {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors flex items-center"
+                className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors flex items-center"
               >
                 <FiUser className="mr-2" />
                 Profile
@@ -465,13 +466,14 @@ export default function Profile() {
       <main className={`pt-24 px-8 transition-all duration-300 ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-24">
-            <ProfileHeader 
-              name={profile.name}
-              profilePhoto={profile.profilePhoto}
-              bannerPhoto={profile.bannerPhoto}
-              onEditBanner={() => setIsEditingBanner(true)}
-              onEditProfile={() => setIsEditingProfile(true)}
-            />
+            <ProfileHeader
+                name="Nihaal"
+                profilePhoto={profilePhoto}
+                bannerPhoto="/images/default-banner.jpg"
+                onEditBanner={() => alert('Edit banner')}
+                onPhotoUpdated={(url) => setProfilePhoto(url)} // 👈 updates image from upload
+              />
+
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

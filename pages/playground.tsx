@@ -14,12 +14,10 @@ import Histogram from '@/components/Histogram';
 export default function Playground() {
   const router = useRouter();
   
-  // Sidebar and profile menu state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Profile menu state
   const [fadeIn, setFadeIn] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   
   // State management for quantum playground
@@ -53,24 +51,6 @@ export default function Playground() {
     setFadeIn(true);
   }, []);
 
-  // Handle click outside sidebar
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Close sidebar if click is outside the sidebar and the sidebar is open
-      if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    // Add event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    // Cleanup
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSidebarOpen]);
-
   // Handle click outside profile menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -84,10 +64,6 @@ export default function Playground() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showProfileMenu]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const handleLogout = async () => {
     try {
@@ -438,32 +414,12 @@ export default function Playground() {
   }, [operationHistory, simulatorHistory, resultsHistory]);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-r from-gray-900 to-black text-white ${fadeIn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
+    <div className={`min-h-screen bg-black text-white transition-opacity duration-500`}>
       {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white p-4 z-40 border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            {/* Hamburger Menu Button */}
-            <button
-              onClick={toggleSidebar}
-              className="text-white focus:outline-none"
-              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                ></path>
-              </svg>
-            </button>
+            {/* Remove Hamburger Menu Button */}
             <Link href="/" className="text-2xl font-bold ml-4">
               XREPO
             </Link>
@@ -543,11 +499,11 @@ export default function Playground() {
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      {/* Sidebar - always fixed and open */}
+      <Sidebar isOpen={true} setIsOpen={() => {}} />
 
       {/* Main Content */}
-      <main className={`pt-24 px-8 transition-all duration-300 ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}>
+      <main className="pt-24 px-8 transition-all duration-300 ml-72">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold">Quantum Circuit Playground</h1>
@@ -710,18 +666,7 @@ export default function Playground() {
             <div className="bg-gray-800 p-6 rounded-lg mt-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl">Live QASM Code</h2>
-                {/* <button
-                  onClick={handleExport}
-                  disabled={operations.length === 0}
-                  className={`px-4 py-2 rounded-lg ${
-                    operations.length === 0
-                      ? 'bg-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } transition-colors`}
-                >
-                  Export to File
-                </button> */}
-              </div>
+                </div>
               <div className="bg-gray-900 p-4 rounded-lg overflow-x-auto">
                 <pre className="text-green-400 font-mono text-sm">
                   {operations.length > 0 
@@ -862,7 +807,7 @@ export default function Playground() {
       )}
 
       {/* How to Use Guide */}
-      <section className="mt-16 px-8 pb-16 transition-all duration-300 bg-gray-900/50 backdrop-blur-sm rounded-lg mx-auto max-w-7xl">
+      <section className="mt-16 px-8 pb-16 transition-all duration-300 bg-gray-900/50 backdrop-blur-sm rounded-lg mx-auto max-w-7xl ml-72">
         <h2 className="text-3xl font-bold pt-8 mb-6 text-blue-300">Quantum Circuit Simulator Guide</h2>
         
         <div className="bg-gray-800/70 p-6 rounded-lg mb-8">

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Share2, ArrowUp, ArrowDown, X, Search, Bell, Plus, User, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Chatbot from '../components/ChatBot';
 import Sidebar from '../components/Sidebar';
 import { FiUser, FiSettings, FiCreditCard, FiLogOut } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
@@ -36,18 +35,14 @@ interface Message {
 export default function Knowledge() {
   const router = useRouter();
   
-  // Sidebar and profile menu state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Profile menu state
   const [fadeIn, setFadeIn] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   
-  // Chatbot state
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  
+ 
   // Notifications state
   const [notifications] = useState([
     { id: 1, text: "Someone commented on your post", time: "2m ago" },
@@ -114,7 +109,7 @@ export default function Knowledge() {
     setIsLoggedIn(true);
     setFadeIn(true);
   }, []);
-  
+
   const handleProfileSetupComplete = (profileData: any) => {
     // Extract relevant profile data
     const userProfileData = {
@@ -144,24 +139,6 @@ export default function Knowledge() {
     toast.success(`Welcome to XREPO, ${profileData.firstName}!`);
   };
 
-  // Handle click outside sidebar
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Close sidebar if click is outside the sidebar and the sidebar is open
-      if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    // Add event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    // Cleanup
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSidebarOpen]);
-
   // Handle click outside profile menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -189,10 +166,6 @@ export default function Knowledge() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showNotifications]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   const handleLogout = async () => {
     try {
@@ -310,32 +283,11 @@ export default function Knowledge() {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-900 text-white ${fadeIn ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
+    <div className={`min-h-screen bg-black text-white transition-opacity duration-500`}>
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white p-4 z-40 border-b border-gray-800">
+      <nav className="fixed top-0 left-0 right-0 bg-black text-white p-4 z-40 border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            {/* Hamburger Menu Button */}
-            <button
-              onClick={toggleSidebar}
-              className="text-white focus:outline-none"
-              aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                ></path>
-              </svg>
-            </button>
             <Link href="/" className="text-2xl font-bold ml-4">
               XREPO
             </Link>
@@ -353,11 +305,10 @@ export default function Knowledge() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-
             {/* Create Post Button */}
             <button
               onClick={() => setIsShareModalOpen(true)}
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors text-sm hidden md:block"
+              className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-sm hidden md:block"
             >
               Share Knowledge
             </button>
@@ -446,19 +397,19 @@ export default function Knowledge() {
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      {/* Sidebar - always fixed and open */}
+      <Sidebar isOpen={true} setIsOpen={() => {}} />
 
       {/* Main Content */}
-      <main className={`pt-24 px-8 transition-all duration-300 ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}>
+      <main className="pt-24 px-8 transition-all duration-300 ml-72">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-8">Knowledge Base</h1>
           
           {/* Knowledge page content remains the same */}
           {/* Share Modal */}
           {isShareModalOpen && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="bg-gray-800/90 backdrop-blur border border-gray-700/50 rounded-xl p-6 max-w-2xl w-full">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-gray-800/90 border-gray-700/50 rounded-xl p-6 max-w-2xl w-full">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Share Your Knowledge</h2>
                   <button
@@ -505,7 +456,7 @@ export default function Knowledge() {
                     </button>
                     <button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
+                      className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
                       <Share2 size={20} />
                       Share
@@ -610,7 +561,7 @@ export default function Knowledge() {
                             }}
                           />
                           <button 
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+                            className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700 transition-colors"
                             onClick={() => {
                               const input = document.querySelector(`input[placeholder="Add a comment..."]`) as HTMLInputElement;
                               handleAddComment(post.id, input.value);

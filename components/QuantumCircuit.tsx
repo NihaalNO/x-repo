@@ -26,7 +26,7 @@ export const QuantumCircuit: React.FC<Props> = ({ numQubits, operations, onGateC
   }, [] as Operation[][]);
 
   return (
-    <div className="quantum-circuit bg-[#1C1C1C] p-4 rounded-lg overflow-x-auto">
+    <div className="quantum-circuit bg-black p-4 rounded-lg overflow-x-auto">
       {/* Qubit labels */}
       <div className="flex min-w-[800px]">
         <div className="w-16 border-r border-gray-700 flex-shrink-0">
@@ -72,15 +72,15 @@ export const QuantumCircuit: React.FC<Props> = ({ numQubits, operations, onGateC
 const GateDisplay: React.FC<{ operation: Operation }> = ({ operation }) => {
   const getGateColor = (gate: string) => {
     const colors: Record<string, string> = {
-      H: 'bg-purple-600',
-      X: 'bg-blue-600',
-      Y: 'bg-green-600',
-      Z: 'bg-red-600',
-      CNOT: 'bg-yellow-600',
-      CZ: 'bg-orange-600',
-      // Add more gate colors
+      H: 'bg-gray-700',
+      X: 'bg-gray-800',
+      Y: 'bg-gray-600',
+      Z: 'bg-gray-900',
+      CNOT: 'bg-gray-700',
+      CZ: 'bg-gray-800',
+      // All gates use only gray/black backgrounds
     };
-    return colors[gate] || 'bg-gray-600';
+    return colors[gate] || 'bg-gray-800';
   };
 
   return (
