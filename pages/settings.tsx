@@ -2,7 +2,15 @@
   import React, { useEffect, useState } from 'react';
   import { motion } from 'framer-motion';
 
-  const TypingMachine = ({ text, speed = 70, fontSize = 'text-2xl', color = 'text-gray-800', fontStyle = '' }) => {
+  interface TypingMachineProps {
+    text: string;
+    speed?: number;
+    fontSize?: string;
+    color?: string;
+    fontStyle?: string;
+  }
+
+  const TypingMachine = ({ text, speed = 70, fontSize = 'text-2xl', color = 'text-gray-800', fontStyle = '' }: TypingMachineProps) => {
     const [displayedText, setDisplayedText] = useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
