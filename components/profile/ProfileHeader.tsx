@@ -85,12 +85,7 @@ const ProfileHeader = ({
           className="h-full w-full object-cover"
           onError={(e) => (e.currentTarget.src = DEFAULT_PROFILE_PHOTO)}
         />
-        <button 
-          onClick={handlePhotoClick}
-          className="absolute bottom-0 right-0 bg-gray-800/70 p-1.5 rounded-full text-white hover:bg-gray-700/70"
-        >
-          <FiEdit2 size={16} />
-        </button>
+        
         <input 
           type="file" 
           accept="image/*"

@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { FiX, FiUpload } from 'react-icons/fi';
+import { supabase } from '../../types/supabaseclient'; // Update the path if needed
+import { ChangeEvent } from 'react';
 
 // Quantum domains list
 const QUANTUM_DOMAINS = [
@@ -62,11 +64,29 @@ const ProfileEditModal = ({
 }: ProfileEditModalProps) => {
   const profilePhotoRef = useRef<HTMLInputElement>(null);
 
+   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    let file;
+
+    if (e.target.files) {
+      file = e.target.files[0];
+    }
+
+    const { data, error } = await supabase.storage
+      .from("profile-photos")
+      .upload("public/" + file?.name, file as File);
+
+    if (data) {
+      console.log(data);
+    } else if (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-gray-600 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-blur flex items-center justify-center z-50 p-4">
       <div className="bg-black rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Edit Profile</h2>
+          //<h2 className="text-xl bg-gray-600 font-semibold text-white">Edit Profile</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <FiX size={24} />
           </button>
@@ -105,7 +125,9 @@ const ProfileEditModal = ({
               ref={profilePhotoRef}
               type="file"
               accept="image/*"
-              onChange={onProfilePhotoChange}
+              onChange={(e) => {
+                    handleUpload(e); 
+                  }}
               className="hidden"
             />
           </div>
