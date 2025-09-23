@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FiStar, FiCode, FiPlus, FiUpload, FiX, FiUser, FiEdit3, FiTrash2, FiEye, FiGitBranch, FiCalendar, FiExternalLink } from "react-icons/fi";
+import { FiStar, FiCode, FiPlus, FiUpload, FiX, FiUser, FiEdit3, FiTrash2, FiEye, FiGitBranch, FiCalendar, FiExternalLink, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../lib/supabaseClient";
 import { auth } from "../utils/firebase";
@@ -35,6 +35,37 @@ interface NewRepository {
   public?: boolean;
 }
 
+// Helper function to handle Supabase authentication for repository operations
+const getAuthenticatedSupabaseClient = async (firebaseUser: User) => {
+  try {
+    // For development: Use service role key or disable RLS temporarily
+    // This is a temporary solution - in production, implement proper auth integration
+    
+    // Method 1: Try to authenticate with Supabase using Firebase email
+    if (firebaseUser.email) {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // Sign in anonymously as a fallback for development
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error('Anonymous auth error:', error);
+          return { client: supabase, userId: null, error };
+        }
+        return { client: supabase, userId: data.user?.id || null, error: null };
+      }
+      
+      return { client: supabase, userId: user.id, error: null };
+    }
+    
+    return { client: supabase, userId: null, error: new Error('No email available') };
+    
+  } catch (error) {
+    console.error('Auth setup error:', error);
+    return { client: supabase, userId: null, error };
+  }
+};
+
 // ---------- MAIN COMPONENT ---------- //
 export default function RepositoryPage() {
   const [repositories, setRepositories] = useState<Repository[]>([]);
@@ -47,19 +78,68 @@ export default function RepositoryPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'yours'>('all');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null);
   const [selectedRepository, setSelectedRepository] = useState<Repository | null>(null);
   const [isRepoModalOpen, setIsRepoModalOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const repositoriesListRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
   const [newRepo, setNewRepo] = useState<NewRepository>({
     name: "",
     description: "",
     language: "Python"
   });
 
+  // Handle scroll events for scroll-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Smooth scroll functions
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const scrollToRepositories = () => {
+    if (repositoriesListRef.current) {
+      repositoriesListRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const scrollToRepository = (index: number) => {
+    const repositoryElement = document.querySelector(`[data-repo-index="${index}"]`);
+    if (repositoryElement) {
+      repositoryElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  };
+
   // Authentication listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       setAuthLoading(false);
+      
+      // Get or ensure Supabase authentication
+      if (user) {
+        const authResult = await getAuthenticatedSupabaseClient(user);
+        setSupabaseUserId(authResult.userId);
+      } else {
+        setSupabaseUserId(null);
+      }
     });
 
     return () => unsubscribe();
@@ -80,15 +160,15 @@ export default function RepositoryPage() {
         setRepositories(data);
         setFilteredRepositories(data);
         // Filter user repositories
-        if (currentUser) {
-          const userRepos = data.filter(repo => repo.owner_id === currentUser.uid);
+        if (currentUser && supabaseUserId) {
+          const userRepos = data.filter(repo => repo.owner_id === supabaseUserId);
           setUserRepositories(userRepos);
         }
       }
       setIsLoading(false);
     };
     fetchRepositories();
-  }, [currentUser]);
+  }, [currentUser, supabaseUserId]);
 
   // Filter repositories based on search term and active tab
   useEffect(() => {
@@ -104,6 +184,11 @@ export default function RepositoryPage() {
         (repo.tags && repo.tags.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       setFilteredRepositories(filtered);
+      
+      // Smooth scroll to repositories list when search results change
+      if (searchTerm.trim() !== "" && filtered.length > 0) {
+        setTimeout(() => scrollToRepositories(), 100);
+      }
     }
   }, [searchTerm, repositories, userRepositories, activeTab]);
 
@@ -138,27 +223,94 @@ export default function RepositoryPage() {
     setIsUploading(true);
 
     try {
-      const { data, error } = await supabase
-        .from("repositories")
-        .insert([
-          {
-            name: newRepo.name,
-            description: newRepo.description,
-            language: newRepo.language,
-            owner_id: currentUser.uid,
-            stargazers_count: 0,
-            forks_count: 0
-          }
-        ])
-        .select();
+      // Get authenticated Supabase client
+      const authResult = await getAuthenticatedSupabaseClient(currentUser);
+      
+      if (!authResult.userId) {
+        alert("Authentication required. Please ensure you're signed in.");
+        setIsUploading(false);
+        return;
+      }
 
-      if (error) {
-        console.error("Error uploading repository:", error);
-        alert("Failed to upload repository. Please try again.");
+      // The RLS policy will check if auth.uid() = owner_id
+      // Make sure we don't include 'id' field as it should be auto-generated
+      const insertData = {
+        name: newRepo.name.trim(), // Trim whitespace
+        description: newRepo.description.trim(),
+        language: newRepo.language,
+        owner_id: authResult.userId, // This must match auth.uid() for RLS policy
+        stargazers_count: 0,
+        forks_count: 0
+      };
+      
+      console.log('Inserting repository with data:', insertData);
+      
+      // First check if a repository with this name already exists for this user
+      const { data: existingRepos, error: checkError } = await authResult.client
+        .from("repositories")
+        .select("name")
+        .eq("owner_id", authResult.userId)
+        .eq("name", insertData.name);
+        
+      if (checkError) {
+        console.error("Error checking existing repositories:", checkError);
+      } else if (existingRepos && existingRepos.length > 0) {
+        alert("A repository with this name already exists. Please choose a different name.");
+        setIsUploading(false);
+        return;
+      }
+      
+      // Retry logic for handling potential sequence issues
+      let insertAttempts = 0;
+      const maxAttempts = 3;
+      let insertResult = null;
+      let insertError = null;
+      
+      while (insertAttempts < maxAttempts && !insertResult) {
+        insertAttempts++;
+        console.log(`Insert attempt ${insertAttempts}`);
+        
+        const { data, error } = await authResult.client
+          .from("repositories")
+          .insert([insertData])
+          .select();
+          
+        if (!error) {
+          insertResult = data;
+          break;
+        } else {
+          insertError = error;
+          console.error(`Insert attempt ${insertAttempts} failed:`, error);
+          
+          // If it's a primary key violation and not the last attempt, wait and retry
+          if (error.code === '23505' && insertAttempts < maxAttempts) {
+            console.log(`Retrying in 1 second...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          } else {
+            break;
+          }
+        }
+      }
+
+      if (insertError) {
+        console.error("Error uploading repository:", insertError);
+        console.error("Full error details:", {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
+        });
+        
+        // Provide more specific error messages
+        if (insertError.code === '23505') {
+          alert("This repository name might already exist or there's a duplicate key issue. Please try a different name or contact support.");
+        } else {
+          alert(`Failed to upload repository: ${insertError.message}. Please try again.`);
+        }
       } else {
         // Add new repository to local state
-        if (data && data[0]) {
-          const newRepository = data[0];
+        if (insertResult && insertResult[0]) {
+          const newRepository = insertResult[0];
           setRepositories(prev => [newRepository, ...prev]);
           setUserRepositories(prev => [newRepository, ...prev]);
           if (activeTab === 'all') {
@@ -206,11 +358,17 @@ export default function RepositoryPage() {
     }
 
     try {
+      // Check if we have Supabase user ID
+      if (!supabaseUserId) {
+        alert("User not authenticated with Supabase. Please sign in again.");
+        return;
+      }
+
       const { error } = await supabase
         .from("repositories")
         .delete()
         .eq('id', repoId)
-        .eq('owner_id', currentUser.uid); // Ensure user can only delete their own repos
+        .eq('owner_id', supabaseUserId); // Ensure user can only delete their own repos
 
       if (error) {
         console.error("Error deleting repository:", error);
@@ -229,7 +387,8 @@ export default function RepositoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white" style={{ scrollBehavior: 'smooth' }}>
+      <div ref={topRef}></div>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 bg-black text-white p-4 z-40 border-b border-gray-800">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -264,7 +423,10 @@ export default function RepositoryPage() {
         <div className="max-w-full sm:max-w-6xl mx-auto mb-6">
           <div className="flex space-x-1 bg-gray-800/50 rounded-lg p-1">
             <button
-              onClick={() => setActiveTab('all')}
+              onClick={() => {
+                setActiveTab('all');
+                setTimeout(() => scrollToRepositories(), 100);
+              }}
               className={`flex-1 px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 ${
                 activeTab === 'all'
                   ? 'bg-blue-600 text-white'
@@ -275,7 +437,10 @@ export default function RepositoryPage() {
               <span>All Repositories</span>
             </button>
             <button
-              onClick={() => setActiveTab('yours')}
+              onClick={() => {
+                setActiveTab('yours');
+                setTimeout(() => scrollToRepositories(), 100);
+              }}
               className={`flex-1 px-4 py-2 rounded-md transition-colors duration-200 flex items-center justify-center space-x-2 ${
                 activeTab === 'yours'
                   ? 'bg-blue-600 text-white'
@@ -289,22 +454,40 @@ export default function RepositoryPage() {
         </div>
 
         {/* Repository List */}
-        <div className="max-w-full sm:max-w-6xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-6">
-            {activeTab === 'all' ? 'All Repositories' : 'Your Repositories'}
-          </h2>
+        <div className="max-w-full sm:max-w-6xl mx-auto" ref={repositoriesListRef}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl sm:text-2xl font-semibold">
+              {activeTab === 'all' ? 'All Repositories' : 'Your Repositories'}
+            </h2>
+            {/* Smooth Scrolling Navigation */}
+            {filteredRepositories.length > 5 && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={scrollToTop}
+                  className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Scroll to Top"
+                >
+                  <FiChevronUp className="w-4 h-4" />
+                </button>
+                <span className="text-sm text-gray-400">
+                  {filteredRepositories.length} repositories
+                </span>
+              </div>
+            )}
+          </div>
           <div className="space-y-4">
             {isLoading ? (
               <div className="text-center text-gray-400">Loading...</div>
             ) : filteredRepositories.length > 0 ? (
-              filteredRepositories.map((repo) => (
-                <RepositoryItem 
-                  key={repo.id} 
-                  repo={repo} 
-                  isOwner={repo.owner_id === currentUser?.uid}
-                  onDelete={handleDeleteRepository}
-                  onRepositoryClick={handleRepositoryClick}
-                />
+              filteredRepositories.map((repo, index) => (
+                <div key={repo.id} data-repo-index={index} className="scroll-smooth">
+                  <RepositoryItem 
+                    repo={repo} 
+                    isOwner={repo.owner_id === supabaseUserId}
+                    onDelete={handleDeleteRepository}
+                    onRepositoryClick={handleRepositoryClick}
+                  />
+                </div>
               ))
             ) : searchTerm ? (
               <div className="text-center text-gray-500 py-8">
@@ -330,6 +513,20 @@ export default function RepositoryPage() {
           </div>
         </div>
       </div>
+
+      {/* Floating Scroll Controls */}
+      {showScrollTop && (
+        <div className="fixed bottom-6 right-6 z-40">
+          {/* Scroll to Top Button */}
+          <button
+            onClick={scrollToTop}
+            className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110"
+            title="Scroll to Top"
+          >
+            <FiChevronUp className="w-5 h-5" />
+          </button>
+        </div>
+      )}
 
       {/* Upload Modal */}
       {isUploadModalOpen && (
@@ -583,7 +780,7 @@ function RepositoryItem({
   onRepositoryClick?: (repo: Repository) => void;
 }) {
   return (
-    <div className="bg-gray-800/50 backdrop-blur p-6 rounded-xl shadow-xl hover:shadow-2xl transition relative">
+    <div className="bg-gray-800/50 backdrop-blur p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative hover:transform hover:scale-[1.02] scroll-smooth">
       {isOwner && (
         <div className="absolute top-4 right-4 flex space-x-2">
           <button
