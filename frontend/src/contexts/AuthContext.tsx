@@ -28,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // @ts-ignore
   const fetchUserProfile = async (uid: string) => {
     try {
       const response = await api.get('/auth/me')

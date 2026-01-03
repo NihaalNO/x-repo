@@ -72,7 +72,7 @@ export default function CodeViewer({ content, language, fileName, fileUrl }: Cod
       <div className="overflow-auto max-h-[600px]">
         <SyntaxHighlighter
           language={detectedLang}
-          style={oneDark}
+          style={vscDarkPlus}
           customStyle={{
             margin: 0,
             padding: '1rem',

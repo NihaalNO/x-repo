@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
-import type { Circuit } from '../types'
+
 
 interface Gate {
   type: string
@@ -81,7 +81,7 @@ export default function CircuitPlayground() {
     if (!aiMessage.trim()) return
     setAiLoading(true)
     try {
-      const circuitDict = buildCircuitDict()
+
       const response = await api.post('/circuits/ai-assist', {
         message: aiMessage,
         circuit_info: {

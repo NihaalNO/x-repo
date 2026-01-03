@@ -385,9 +385,47 @@ export default function PostDetail() {
                 <span className="text-xs">{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
               </button>
             </div>
-            <div className="prose max-w-none">
+            <div className="max-w-none">
               {post.post_type === 'text' ? (
-                <ReactMarkdown>{post.content}</ReactMarkdown>
+                <div className="prose max-w-none">
+                  <ReactMarkdown>{post.content}</ReactMarkdown>
+                </div>
+              ) : post.post_type === 'code' ? (
+                <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
+                  <code className="text-sm">{post.content}</code>
+                </pre>
+              ) : post.post_type === 'link' ? (
+                <div className="p-4 bg-gray-50 rounded">
+                  <p className="mb-2">Link:</p>
+                  <a 
+                    href={post.content} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    {post.content}
+                  </a>
+                </div>
+              ) : post.post_type === 'image' ? (
+                <div className="flex justify-center mt-4">
+                  <img 
+                    src={post.content} 
+                    alt="Post content" 
+                    className="max-w-full h-auto rounded-lg"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null; // prevents looping
+                      target.src = '/placeholder-image.png'; // fallback image
+                    }}
+                  />
+                </div>
+              ) : post.post_type === 'circuit' ? (
+                <div className="p-4 bg-gray-100 rounded">
+                  <p className="font-medium mb-2">Quantum Circuit:</p>
+                  <pre className="text-sm overflow-x-auto">
+                    <code>{post.content}</code>
+                  </pre>
+                </div>
               ) : (
                 <pre className="bg-gray-100 p-4 rounded overflow-x-auto">
                   <code>{post.content}</code>

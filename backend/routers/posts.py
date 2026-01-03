@@ -1,10 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+from enum import Enum
 from middleware.auth import get_current_user_uid
 from services.supabase_service import get_supabase
 from datetime import datetime, timedelta
 import uuid
+
+
+class PostType(str, Enum):
+    text = "text"
+    code = "code"
+    link = "link"
+    image = "image"
+    circuit = "circuit"
 
 router = APIRouter()
 
@@ -12,13 +21,12 @@ class PostCreate(BaseModel):
     community_id: str
     title: str
     content: str
-    post_type: str = "text"
-    tags: Optional[list] = []
+    post_type: PostType = PostType.text
 
 class PostUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
-    tags: Optional[list] = None
+    post_type: Optional[PostType] = None
 
 @router.get("")
 async def list_posts(
@@ -142,7 +150,7 @@ async def get_home_feed(
     user_id = user_result.data[0]["id"]
     
     # Get communities the user is following
-    membership_result = supabase.table("community_memberships").select("community_id").eq("user_id", user_id).execute()
+    membership_result = supabase.table("community_members").select("community_id").eq("user_id", user_id).execute()
     community_ids = [m["community_id"] for m in membership_result.data] if membership_result.data else []
     
     # If user is not in any communities, return empty result
@@ -315,14 +323,27 @@ async def create_post(
     
     user_id = user_result.data[0]["id"]
     
+    # Validate content based on post type
+    if post.post_type == PostType.link:
+        # For link posts, validate URL format
+        import re
+        url_pattern = re.compile(r'^https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+$')
+        if not url_pattern.match(post.content):
+            raise HTTPException(status_code=400, detail="Invalid URL format for link post")
+    elif post.post_type == PostType.image:
+        # For image posts, validate image URL format
+        import re
+        image_pattern = re.compile(r'^https?://.*\.(jpg|jpeg|png|gif|bmp|webp)$', re.IGNORECASE)
+        if not image_pattern.match(post.content):
+            raise HTTPException(status_code=400, detail="Invalid image URL format")
+    
     post_data = {
         "id": str(uuid.uuid4()),
         "community_id": post.community_id,
         "user_id": user_id,
         "title": post.title,
         "content": post.content,
-        "post_type": post.post_type,
-        "tags": post.tags,
+        "post_type": post.post_type.value,  # Store the string value, not the enum
         "upvotes": 0,
         "downvotes": 0,
         "comment_count": 0,
@@ -367,9 +388,27 @@ async def update_post(
     update_data = post.dict(exclude_unset=True)
     update_data["updated_at"] = datetime.utcnow().isoformat()
     
-    # Ensure tags are properly handled
-    if hasattr(post, 'tags') and post.tags is not None:
-        update_data['tags'] = post.tags
+    # Remove tags from update_data since it doesn't exist in the database
+    update_data.pop('tags', None)
+    
+    # Validate content based on post type if it's being updated
+    if hasattr(post, 'post_type') and post.post_type is not None:
+        if post.post_type == PostType.link:
+            # For link posts, validate URL format
+            import re
+            url_pattern = re.compile(r'^https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+$')
+            if hasattr(post, 'content') and post.content and not url_pattern.match(post.content):
+                raise HTTPException(status_code=400, detail="Invalid URL format for link post")
+        elif post.post_type == PostType.image:
+            # For image posts, validate image URL format
+            import re
+            image_pattern = re.compile(r'^https?://.*\.(jpg|jpeg|png|gif|bmp|webp)$', re.IGNORECASE)
+            if hasattr(post, 'content') and post.content and not image_pattern.match(post.content):
+                raise HTTPException(status_code=400, detail="Invalid image URL format")
+        
+        # Convert enum to string value
+        if 'post_type' in update_data:
+            update_data['post_type'] = update_data['post_type'].value
     
     result = supabase.table("posts").update(update_data).eq("id", post_id).execute()
     

@@ -4,7 +4,6 @@ import type { Project } from '../types'
 interface ProjectHeaderProps {
   project: Project
   starred: boolean
-  forked: boolean
   onStar: () => void
   onFork: () => void
   onDownload: () => void
@@ -15,7 +14,6 @@ interface ProjectHeaderProps {
 export default function ProjectHeader({
   project,
   starred,
-  forked,
   onStar,
   onFork,
   onDownload,
@@ -54,11 +52,10 @@ export default function ProjectHeader({
         <div className="flex items-center gap-2 ml-4">
           <button
             onClick={onStar}
-            className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
-              starred
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${starred
+              ? 'bg-primary-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
           >
             <span>⭐</span>
             <span>Star</span>

@@ -16,7 +16,7 @@ export default function ProjectDetail() {
   const [files, setFiles] = useState<ProjectFile[]>([])
   const [loading, setLoading] = useState(true)
   const [starred, setStarred] = useState(false)
-  const [forked, setForked] = useState(false)
+
   const [selectedFile, setSelectedFile] = useState<ProjectFile | null>(null)
   const [fileContent, setFileContent] = useState<string>('')
   const [loadingFile, setLoadingFile] = useState(false)
@@ -35,7 +35,7 @@ export default function ProjectDetail() {
       setProject(response.data)
       setFiles(response.data.files || [])
       // Set README as default selected file if available
-      const readmeFile = response.data.files?.find((f: ProjectFile) => 
+      const readmeFile = response.data.files?.find((f: ProjectFile) =>
         f.file_name.toLowerCase() === 'readme.md' || f.file_name.toLowerCase().endsWith('/readme.md')
       )
       if (readmeFile) {
@@ -100,7 +100,7 @@ export default function ProjectDetail() {
     }
     try {
       await api.post(`/projects/${id}/fork`)
-      setForked(true)
+
       if (project) {
         setProject({
           ...project,
@@ -165,7 +165,6 @@ export default function ProjectDetail() {
       <ProjectHeader
         project={{ ...project, files }}
         starred={starred}
-        forked={forked}
         onStar={handleStar}
         onFork={handleFork}
         onDownload={downloadProject}
@@ -192,11 +191,10 @@ export default function ProjectDetail() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-4 text-sm font-medium ${
-                    activeTab === tab
-                      ? 'border-b-2 border-primary-500 text-primary-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className={`px-6 py-4 text-sm font-medium ${activeTab === tab
+                    ? 'border-b-2 border-primary-500 text-primary-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>

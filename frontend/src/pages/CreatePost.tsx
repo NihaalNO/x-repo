@@ -13,9 +13,7 @@ export default function CreatePost() {
     title: '',
     content: '',
     post_type: 'text' as 'text' | 'code' | 'link' | 'image' | 'circuit',
-    tags: [] as string[],
   })
-  const [tagInput, setTagInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -47,6 +45,24 @@ export default function CreatePost() {
       return
     }
 
+    // Validate content based on post type
+    if (formData.post_type === 'link') {
+      const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+      if (!urlPattern.test(formData.content)) {
+        setError('Please enter a valid URL for link posts');
+        return;
+      }
+    } else if (formData.post_type === 'image') {
+      const imagePattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/.*\.(jpg|jpeg|png|gif|bmp|webp)$/i;
+      if (!imagePattern.test(formData.content)) {
+        setError('Please enter a valid image URL (jpg, jpeg, png, gif, bmp, or webp)');
+        return;
+      }
+    } else if (formData.post_type === 'text' && !formData.content.trim()) {
+      setError('Content is required for text posts');
+      return;
+    }
+
     setLoading(true)
     setError('')
 
@@ -54,31 +70,18 @@ export default function CreatePost() {
       const response = await api.post('/posts', {
         ...formData,
         community_id: community.id,
-        tags: formData.tags,
       })
+      
+      // Navigate to the newly created post
       navigate(`/posts/${response.data.id}`)
     } catch (err: any) {
+      console.error('Error creating post:', err);
       setError(err.response?.data?.detail || 'Failed to create post')
       setLoading(false)
     }
   }
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim()],
-      })
-      setTagInput('')
-    }
-  }
 
-  const removeTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter(t => t !== tag),
-    })
-  }
 
   if (!community) {
     return (
@@ -184,50 +187,7 @@ export default function CreatePost() {
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tags
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  addTag()
-                }
-              }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Add a tag and press Enter"
-            />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-            >
-              Add
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {formData.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm flex items-center gap-2"
-              >
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="hover:text-primary-900"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
+
 
         <div className="flex justify-end gap-4">
           <Link
