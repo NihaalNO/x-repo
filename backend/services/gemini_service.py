@@ -3,15 +3,13 @@ import os
 from typing import Dict, Any, Optional
 
 # Configure Gemini API
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+# Moved configuration to within functions to handle environment variable loading time
 
 def get_ai_assistance(
     user_message: str,
     circuit_info: Optional[Dict[str, Any]] = None,
     context: Optional[str] = None
-) -> str:
+) -> Dict[str, Any]:
     """
     Get AI assistance from Gemini for quantum circuit design, debugging, or education
     
@@ -21,22 +19,31 @@ def get_ai_assistance(
         context: Additional context about the conversation
     
     Returns:
-        AI response text
+        Dict containing response text or error
     """
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        return "Gemini API key not configured. Please set GEMINI_API_KEY environment variable."
+        return {
+            "error": "Gemini API key not configured",
+            "detail": "Please set GEMINI_API_KEY environment variable."
+        }
     
     try:
+        genai.configure(api_key=api_key)
+        
         # Build context-aware prompt
         prompt = build_prompt(user_message, circuit_info, context)
         
-        # Use Gemini Pro model
-        model = genai.GenerativeModel('gemini-pro')
+        # Use Gemini 2.0 Flash model (verified available)
+        model = genai.GenerativeModel('gemini-2.0-flash')
         response = model.generate_content(prompt)
         
-        return response.text
+        return {"response": response.text}
     except Exception as e:
-        return f"Error getting AI assistance: {str(e)}"
+        return {
+            "error": "AI Service Error",
+            "detail": str(e)
+        }
 
 def build_prompt(user_message: str, circuit_info: Optional[Dict[str, Any]], context: Optional[str]) -> str:
     """Build context-aware prompt for Gemini"""

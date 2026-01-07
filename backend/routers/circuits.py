@@ -115,11 +115,15 @@ async def ai_assist(
     uid: str = Depends(get_current_user_uid)
 ):
     """Get AI assistance for circuit design, debugging, or optimization"""
-    response = get_ai_assistance(
+    result = get_ai_assistance(
         request.message,
         request.circuit_info
     )
-    return {"response": response}
+    
+    if "error" in result:
+        raise HTTPException(status_code=500, detail=result["detail"])
+        
+    return {"response": result["response"]}
 
 @router.post("/validate")
 async def validate(circuit_request: CircuitSimulateRequest):

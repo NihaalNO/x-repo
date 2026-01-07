@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
+import Histogram from '../components/Histogram'
 
 
 interface Gate {
@@ -16,6 +17,7 @@ export default function CircuitPlayground() {
   const [circuitName, setCircuitName] = useState('')
   const [simulationResult, setSimulationResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [autoSimulate, setAutoSimulate] = useState(false) // New state for auto-simulation
   const [aiMessage, setAiMessage] = useState('')
   const [aiResponse, setAiResponse] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
@@ -33,8 +35,6 @@ export default function CircuitPlayground() {
   }
 
   const buildCircuitDict = () => {
-    // This would need to be converted to Qiskit circuit format
-    // For now, return a simplified structure
     return {
       qubits: qubits,
       gates: gates,
@@ -60,6 +60,18 @@ export default function CircuitPlayground() {
     }
   }
 
+  // Auto-simulate effect
+  useEffect(() => {
+    if (autoSimulate && gates.length > 0) {
+      // Debounce simulation slightly to avoid too many requests
+      const timer = setTimeout(() => {
+        simulateCircuit()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gates, qubits, autoSimulate])
+
   const exportQASM = async () => {
     try {
       const circuitDict = buildCircuitDict()
@@ -72,16 +84,17 @@ export default function CircuitPlayground() {
       a.href = url
       a.download = 'circuit.qasm'
       a.click()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to export QASM:', error)
+      alert('Failed to export QASM: ' + (error.response?.data?.detail || error.message))
     }
   }
 
   const askAI = async () => {
     if (!aiMessage.trim()) return
     setAiLoading(true)
+    setAiResponse('') // Clear previous response
     try {
-
       const response = await api.post('/circuits/ai-assist', {
         message: aiMessage,
         circuit_info: {
@@ -91,9 +104,10 @@ export default function CircuitPlayground() {
         },
       })
       setAiResponse(response.data.response)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get AI assistance:', error)
-      setAiResponse('Failed to get AI assistance. Please try again.')
+      const errorMessage = error.response?.data?.detail || 'Failed to get AI assistance. Please try again.'
+      setAiResponse(`Error: ${errorMessage}`)
     } finally {
       setAiLoading(false)
     }
@@ -126,21 +140,35 @@ export default function CircuitPlayground() {
                   className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={simulateCircuit}
-                  disabled={loading || gates.length === 0}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {loading ? 'Simulating...' : 'Simulate'}
-                </button>
-                <button
-                  onClick={exportQASM}
-                  disabled={gates.length === 0}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Export QASM
-                </button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="autoSimulate"
+                    checked={autoSimulate}
+                    onChange={(e) => setAutoSimulate(e.target.checked)}
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  />
+                  <label htmlFor="autoSimulate" className="text-sm text-gray-700">
+                    Auto-simulate
+                  </label>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={simulateCircuit}
+                    disabled={loading || gates.length === 0}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    {loading ? 'Simulating...' : 'Simulate'}
+                  </button>
+                  <button
+                    onClick={exportQASM}
+                    disabled={gates.length === 0}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    Export QASM
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -213,27 +241,23 @@ export default function CircuitPlayground() {
             </div>
           </div>
 
-          {/* Simulation Results */}
+          {/* Simulation Results with Histogram */}
           {simulationResult && (
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold mb-4">Simulation Results</h2>
               {simulationResult.success ? (
                 <div>
                   {simulationResult.counts && (
-                    <div>
-                      <h3 className="font-medium mb-2">Measurement Counts:</h3>
-                      <div className="bg-gray-50 p-4 rounded">
-                        <pre className="text-sm overflow-x-auto">
-                          {JSON.stringify(simulationResult.counts, null, 2)}
-                        </pre>
-                      </div>
+                    <div className="mb-6">
+                      <h3 className="font-medium mb-2">Measurement Probabilities</h3>
+                      <Histogram data={simulationResult.counts} />
                     </div>
                   )}
                   {simulationResult.statevector && (
                     <div className="mt-4">
                       <h3 className="font-medium mb-2">State Vector:</h3>
-                      <div className="bg-gray-50 p-4 rounded">
-                        <pre className="text-sm overflow-x-auto">
+                      <div className="bg-gray-50 p-4 rounded max-h-60 overflow-y-auto">
+                        <pre className="text-sm">
                           {JSON.stringify(simulationResult.statevector, null, 2)}
                         </pre>
                       </div>
@@ -241,7 +265,10 @@ export default function CircuitPlayground() {
                   )}
                 </div>
               ) : (
-                <div className="text-red-600">{simulationResult.error}</div>
+                <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                  <p className="font-medium">Simulation Error</p>
+                  <p className="text-sm mt-1">{simulationResult.error}</p>
+                </div>
               )}
             </div>
           )}
@@ -267,8 +294,8 @@ export default function CircuitPlayground() {
                 {aiLoading ? 'Asking AI...' : 'Ask AI'}
               </button>
               {aiResponse && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{aiResponse}</p>
+                <div className={`mt-4 p-4 rounded-lg ${aiResponse.startsWith('Error:') ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-700'}`}>
+                  <p className="text-sm whitespace-pre-wrap">{aiResponse}</p>
                 </div>
               )}
             </div>
