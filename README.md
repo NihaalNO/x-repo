@@ -169,7 +169,7 @@ x-repo/
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.See [Contributing.md](Contributing.md) file for more details.
+Contributions are welcome! Please feel free to submit a Pull Request.See [Contributing.md](CONTRIBUTING.md) file for more details.
 
 ## License
 
